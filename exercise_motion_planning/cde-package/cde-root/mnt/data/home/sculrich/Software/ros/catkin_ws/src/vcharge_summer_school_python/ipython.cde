@@ -1,0 +1,2 @@
+#!/bin/sh
+../../../../../../../../../../cde-exec '-o' '/home/sculrich/Projekte/V-Charge/summer_school/exercise_motion_planning/exercise_motion_planning/cde-package' 'ipython' "$@"

@@ -1,0 +1,130 @@
+// Debugging
+// =================================================
+alwaysShowConsole = true
+debugGuiThreadAndSimThreadSynchronizationActivity = false // will also slow down V-REP
+debugGuiThreadAndSimThreadSynchronizationLockFailActivity = false
+debugInternalFunctionAccess = false // will also heavily slow down V-REP
+debugCApiAccess = false // will also drastically slow down V-REP
+debugLuaApiAccess = false // will also slow down V-REP
+debugThreadSwitches = false // will also slow down V-REP
+debugEasylockActivity = false // will also slow down V-REP
+sendDebugInformationToFile = false // if true, debug info is sent to debugLog.txt
+
+
+// Rendering
+// =================================================
+idleFps = 8
+threadedRenderingDuringSimulation = 0 // recommended to keep 0 (-1=disabled, 0=pre-enabled, 1=enabled).
+desiredOpenGlMajor = -1 // recommended to keep -1.
+desiredOpenGlMinor = -1 // recommended to keep -1.
+offscreenContextType = -1 // recommended to keep -1 (-1=default, 0=Qt offscreen, 1=QGLWidget visible, 2=QGLWidget invisible).
+fboType = -1 // recommended to keep -1 (-1=default, 0=native, 1=QOpenGLFramebufferObject).
+forceFboViaExt = false // recommended to keep false.
+oglCompatibilityTweak1 = false // recommended to keep false since it causes small memory leaks.
+visionSensorsUseGuiThread_windowed = -1 // recommended to keep -1 (-1=default, 0=GUI when not otherwise possible, 1=always GUI).
+visionSensorsUseGuiThread_headless = -1 // recommended to keep -1 (-1=default, 0=GUI when not otherwise possible, 1=always GUI).
+useGlFinish = false // recommended to keep false. Graphic card dependent.
+useGlFinish_visionSensors = false // recommended to keep false. Graphic card dependent.
+vsync = 0 // recommended to keep at 0. Graphic card dependent.
+debugOpenGl = false
+stereoDist = 0 // 0=no stereo, otherwise the intra occular distance (0.0635 for the human eyes).
+
+
+// Visual
+// =================================================
+retinaScaling1X = 0 // 0=automatic scaling
+retinaScaling1Y = 0 // 0=automatic scaling
+retinaScaling2X = 0 // 0=automatic scaling
+retinaScaling2Y = 0 // 0=automatic scaling
+retinaScaling3X = 0 // 0=automatic scaling
+retinaScaling3Y = 0 // 0=automatic scaling
+renderingSurfaceVShift = 0
+renderingSurfaceVResize = 0
+scriptEditorFont =  // empty=default.
+scriptEditorFontSize = -1 // -1=default.
+auxConsoleFont =  // empty=default
+auxConsoleFontSize = -1 // -1=default.
+displayWorldRef = true
+antialiasing = false
+displayBoundingBoxeWhenObjectSelected = true
+guiFontSize_Win = 11
+guiFontSize_Mac = 10
+guiFontSize_Linux = 10
+allowTransparentDialogs = false
+dialogTransparencyFactor = 0.400000006
+statusbarInitiallyVisible = true
+
+
+// Directories
+// =================================================
+defaultDirectoryForScenes =  // absolute path, e.g. d:/myScenes (or leave empty for default path)
+defaultDirectoryForModels =  // absolute path, e.g. d:/myModels (or leave empty for default path)
+defaultDirectoryForCadFiles =  // absolute path, e.g. d:/myCadFiles (or leave empty for default path)
+defaultDirectoryForMiscFiles =  // absolute path, e.g. d:/myMiscFiles (or leave empty for default path)
+
+
+// Serialization
+// =================================================
+autoSaveDelay = 2 // in minutes. 0 to disable.
+doNotWritePersistentData = false
+compressFiles = true
+saveApproxNormals = true
+packIndices = true
+fileDialogs = -1 // recommended to keep -1 (-1=default, 0=native dialogs, 1=Qt dialogs).
+bulletSerializationBuffer = 10000000
+
+
+// Undo/Redo
+// =================================================
+undoRedoEnabled = true
+undoRedoLevelCount = 16
+undoRedoMaxBufferSize = 80000000
+timeInMsForUndoRedoTooLongWarning = 200
+
+
+// Messaging
+// =================================================
+doNotShowOpenglSettingsMessage = false
+doNotShowCrashRecoveryMessage = false
+doNotShowUpdateCheckMessage = false
+
+
+// Compatibility
+// =================================================
+correctColorsAndLights = true
+forceDeprecatedFileformatLoad = false
+applicationTweak1 = -1 // recommended to keep -1 (1=non modal file dialogs)
+applicationTweak2 = -1 // recommended to keep -1 (1=UI processes partial messages while waiting for read/write lock)
+applicationTweak3 = -1 // recommended to keep -1 (1=UI processes full messages in certain situations)
+
+
+// Floating license
+// =================================================
+floatingLicenseEnabled = false
+floatingLicenseServer = xxx.xxx.xxx.xxx
+floatingLicensePort = 20249
+
+
+// Various
+// =================================================
+mouseWheelZoomFactor = 1
+dynamicActivityRange = 1000
+unit_degrees = true
+unit_meters = true
+unit_seconds = true
+objectTranslationStepSize = 0.0249999985
+objectRotationStepSize = 5
+workThreadCount = 0 // -1, 0-256. (0 to disable, -1 for automatic setting (i.e. thread cnt=core cnt)).
+processorCoreAffinity = 0 // recommended to keep 0 (-1:os default, 0:all threads on same core, m: affinity mask (bit1=core1, bit2=core2, etc.))
+freeServerPortStart = 20000
+freeServerPortRange = 2000
+useExternalScriptEditor = false
+externalScriptEditor = c:/Program Files (x86)/Notepad++/notepad++
+abortScriptExecutionButton = 2 // in seconds. Zero to disable.
+conParam1 = 7673677332697F756975736C7F3B7C7484
+conParam2 = 323234373C
+triCountInOBB = 8
+removeIdenticalVertices = true
+identicalVerticesTolerance = 9.99999975e-005
+removeIdenticalTriangles = true
+triangleWindingCheck = true

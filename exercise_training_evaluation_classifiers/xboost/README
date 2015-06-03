@@ -1,0 +1,308 @@
+
+== REQUIREMENTS ==
+
+CMAKE
+
+LINUX
+ GCC 4.x
+ pthread 
+ 
+WINDOWS
+ MSYS/MINGW/CYGWIN (no multithread for now)
+ no MSVC for now.
+ 
+== HOW TO COMPILE ==
+
+if you have cmake, create a build directory and run cmake
+ cmake <source path>
+or if you have the ncurses gui for cmake
+ ccmake <source path>
+
+== DESCRIPTION of TOOLS ==
+
+trainer 
+ a tool to train an ensamble learner
+
+svm_trainer
+ a specific tool to train SVM learner
+
+process
+ a tool to post-process learner
+ 
+classify
+ tool used to test a learner (ImageClassifier) and generate some stats
+ 
+roc
+ tool to test a learner and generate ROC/PRC, testing ImageClassifier and ObjectDetector classes. 
+ 
+dumpfeature
+ tool to debug feature used by the learner
+ 
+svm_convert
+ convert a PGM training set in a HOG-SVM file for libsvm or liblinear
+
+== HOW TO TRAIN ==
+
+trainer <training samples> [a lot of options]
+
+example:
+ trainer pedestrian.sdf
+
+sdf (Set Description File) are files with a filename per row and some command (see PATTERN IMAGE FORMAT section)
+
+additional parameters can be obtained with
+ trainer -h
+
+LIST OF TYPE OF FEATURES
+ -f integralchannel = extract the Integral Channel Features 
+ -f haar = extract the Haar Features
+
+LIST OF FEATURES GENERATOR
+ rs <n>   = Generate n features, Random Sampled
+ jsgf <n> = Generate n features, Random generated sparse granular features [only for Haar]
+
+ the default is the "Brute Force" algorithm that exhaustively tries every possibile feature from the pool.
+ 
+OPTIONS FOR HAAR FEATURES
+ -p <str>
+    one or more token from 2h2v3h3v4q2c2x2X2y2Y2z2Z2w2W2u2U2n3H3V5d5D5c2l2L2r2m2p2s2t9d9cbvbhdqbabb3X3Y4v4hmvmhP1P2P3
+    each token is a specific Haar features. Exist some macro:
+    -p std uses the standard 2h2v3h3v4q features (Viola&Jones paper)
+    -p iso uses only features with the same ammount of positive and negative response. Normally this is the preferred choice.
+    
+OPTIONS FOR INTEGRAL CHANNEL FEATURES
+ -p <n>[s][m][l]
+ where 
+	n is number of channel of gradients, 
+	s indicate the use of sign of the gradient, optional if it present must be used, 
+	m indicate the use of the magnitude channel, optional if it present must be used, 
+	l indicate the use of the luminace channel, optional if it present must be used 
+	
+ "Integral Channel Features" suggests 6ml
+ 
+ 
+ example:
+  -p 9ml 
+   compute integral channel features with 9 bin, using luminance and magnitude channel without sign of gradient
+
+OPTIONS FOR BOOTSTRAPPING 
+--bstrap N 
+	iterate N bootstrapping. At each iteration N hard negative from negative pool are selected and added to training set.
+
+--bstrap-scale-factor s
+        Scale factor between different scale on looking for negative patterns
+        
+
+ example: 
+  --bstrap 10 --bstrap-scale-factor 1.41421356237
+   for 10 bootstraps cycle and 2 scales per octave:
+  
+OPTIONS FOR TERMINATE THE TRAINING
+ -n <max_n_classifier>
+    Attach not more than max_n_classifier in the *boost chain. Default 100 iterations.
+ 
+ -n +<delta_classifier>
+    During Bootstrap increase at any bootstrap iteration the number max of classifier of a delta number
+
+ examples:
+  trainer test.sdf -n 1000
+   terminate after 1000 adaboost iterations
+   
+  trainer test.sdf -n +500
+   terminate after 500 iteration, and every bootstrap cycle additional 500 iterations are computed
+    
+ --auto-terminate
+  Auutoterminate when there are no errors
+  
+ --terminate-conditio tpr_goal fpr_goal n
+  Training terminate after <n> iteration that the conditions on tpr and fpr are satisfied.
+	
+LIST OF AVAILABLE TRAINER
+see -a <options> in trainer --help
+
+
+
+
+
+* Some examples for AdaBoost and generic flags:
+
+trainer -n 20 training.sdf
+ base example, default algorithm (AdaBoost with DecisionStump), default feature (Haar). Terminate after 20 adaboost iterations
+
+trainer -n 20 training.sdf -p iso -t 8
+ only [iso] Haar features are used. 8 threads running together during training.
+ 
+trainer v-charge.sdf -r 32 32 -N 2 --bstrap 10 -p iso -g rs 50000 -t 8 -n 1000 --terminate-condition 1.0 0.0001 5 
+ 10 bootstrap iterations, 2 features are extracted randomly from the training set (for each image and scale), 50000 random sampled features, terminate when 100% is reached on training set, 
+ or after 1000 iterations.
+
+trainer v-charge.sdf -r 32 32 -N 10 --bstrap 10 -n 300 --auto-terminate -t 4 -p iso -g rs 10000
+ 10 bootstrap iterations, 10000 random samples features, autoterminate when 100% reached on training set, or after 300 iterations.
+
+trainer train_38x38.sdf -o train_38x38_gentle.haar -n 300 -g rs 20000 -a gentleadaboost-stump -t 8 -p iso
+ example of using Gentle AdaBoost algorithm.
+ 
+trainer train_38x38.sdf -o train_38x38_real.haar -n 300 -g rs 20000 -a realadaboost-stump -t 8 -p iso
+ example of using Real AdaBoost algorithm.
+ 
+trainer v-charge.sdf -t 4 -r 52 52 --bstrap 10 --bstrap-scale-factor 1.41421356237 -o train_52x52_adaboost_bstrap.haar -n 300 -N 15 -p iso -g rs 20000
+trainer v-charge.sdf -t 6 -r 52 52 --bstrap 10 --bstrap-scale-factor 1.41421356237 -o train_52x52_adaboost_bstrap.haar -n 300 -N 10 -p iso -g rs 50000
+
+trainer daimler_ped.sdf -o ped.icf -n 2000 -g rs 50000 -p 9ml -f integralchannel
+trainer daimler_ped.sdf -o ped.icf -n 2000 -g rs 50000 -p 9ml -f integralchannel -r 48 96 -N 10
+trainer daimler_ped.sdf -o ped.icf -n 2000 -g rs 50000 -p 9ml -f integralchannel -r 48 96 -N 10 --bstrap 10 --terminate-conditions 0.99 0.001 5
+
+* Example for the new heuristic based adaboost on decision-stump:
+
+trainer train.sdf -a fast-adaboost-stump -g rs 50000 -p iso -r 32 32 -N 5 -n 100 --refresh 20 --reoptimize
+trainer -f integralchannel train-pedestrian.lst -p 6ml -n 1000 --bstrap 10 -N 1 --bstrap-negatives 3 -a fast-adaboost-stump --refresh 50 --reoptimize -g rs 5000 --fsize 25
+
+* Example for Decision tree
+ trainer vehicle-train.sdf -a decision-tree -o vehicle-decision-tree.haar -r 38 38 -N 10 -g rs 100000
+ 
+* Example for Boosted-Tree
+
+ trainer train-pedestrian.lst -r 48 96 -N 1 -n 2000 -g rs 100 --refresh 10 --bstrap 3 -a boosted-tree -d 2 
+ trainer -a boosted-tree pedestrian.sdf -d 10 -o boosted-tree.txt -n 20 -p iso -g rs 4096 -sr 0.33333
+ trainer train-pedestrian.lst -o pedestrian-decision-stump-haar.dat -a boosted-tree -g rs 500 -N 1 --bstrap 5 --bstrap-negatives 5 -d 2 -n 2000 -r 48 96 --terminate-condition 1.0 0.0 2 --fast-heuristic 256 --refresh 2 
+ trainer train-pedestrian.lst -o pedestrian-decision-stump-fast-icf.dat -a boosted-tree-fast -g rs 5000 -N 1 --bstrap 5 --bstrap-negatives 5 -d 2 -n 1000 -r 48 96 --terminate-condition 1.0 0.0 2 --fast-heuristic 256 --refresh 20 -f integralchannel -t 32
+ trainer train-pedestrian.lst -a adaboost-stump -f haar -o adaboost-stump-haar.dat -n 2000 --terminate-condition 0.9 0.0 10 --bstrap-negatives 5 -N 1 --bstrap 7 -g rs 5000 --fast-heuristic 256 -j 8
+ 
+== NOTE ON MULTITHREADING ==
+
+adaboost-stump has a preload flag to improve performances.
+The preload count is also used to select how many feature processed in parallel. With preload=1 it is not possible to have a multithread trainer.
+ 
+== HOW TO TEST ON VALIDATION ==
+
+* 
+classify <output file> <list of test pattern>
+
+example:
+ classify haar.txt testpedestrian.lst
+ classify haar.txt testnonpedestrian.lst
+
+* 
+roc [options]
+
+roc generates performance curves and test image classifier and object detector classes.
+
+output format follow the structure:
+
+[1:Threshold] [2:TP] [3:TN] [4:FP] [5:FN] [6:Recall/TPR] [7:FPR] [8:Precision] [9:FP/Frame]
+
+column for ROC
+7:6
+
+column for Precision-Recall curve
+6:8
+
+column for TPR-FP/Frame curve:
+9:6 
+
+
+== PATTERN IMAGE FORMAT ==
+
+a text file with PGM images separated by carriage return and category
+(for example generated by find -name \*.pgm > file.lst)
+
+example:
+
+ #CLASS 1
+ pedestrian/1/ped_examples/img_04471.pgm
+ pedestrian/1/ped_examples/img_00736.pgm
+ ... etc etc ...
+ #CLASS -1 or #DEFAULT or #AUTO
+ ... etc etc ...
+
+Syntax Highlighs: 
+ 
+#CLASS 1
+ positive class: the entire image is a positive and will be rescaled to working size
+#CLASS -1
+ negative class: the entire image is a negative and will be rescaled to working size
+#AUTO
+ negative/positive class: ROIs are provided to declare positive and negative objects. Objects will be rescaled to working size in the training stage or are used as reference during testing.
+#DEFAULT
+ negative/positive/donotcare class: the entire image is a negative frame and subwindow could be used as negative samples. Some areas can contain "do not care" roi that cannot be used as negative. 
+ Positives will be rescaled during training and used as reference during test.
+ 
+NOTE: 
+To validate a training using "roc" application, #CLASS +1 and #DEFAULT can be used to test an ImageClassifier, #DEFAULT with positive and ignored areas can be used to test an ObjectDetector.
+  
+== HOW To Generate Image List ==
+
+Download the training set, for example:
+
+* the new mono pedestrian dataset 
+http://www.gavrila.net/Datasets/Daimler_Pedestrian_Benchmark_D/Daimler_Mono_Ped__Detection_Be/daimler_mono_ped__detection_be.html
+
+Unzip it.
+Create image list file, using, for example, find
+
+echo "#CLASS 1" > pedestrian.sdf
+find DaimlerBenchmark/Data/TrainingData/Pedestrians/48x96/ >> pedestrian.sdf
+echo "#DEFAULT" >> pedestrian.sdf
+find DaimlerBenchmark/Data/TrainingData/NonPedestrians/ >> pedestrian.sdf
+
+Train and test!
+
+* for the old 18x36 pedestrian dataset (now deprecated)
+http://www.gavrila.net/Research/Pedestrian_Detection/Daimler_Pedestrian_Benchmark_D/Daimler_Mono_Ped__Class__Bench/daimler_mono_ped__class__bench.html
+
+Unzip it.
+Create image list file, using, for example, find
+
+echo "#CLASS 1" > pedestrian.sdf
+find */ped_examples >> pedestrian.sdf
+echo "#CLASS -1" >> pedestrian.sdf
+find */non-ped_examples >> pedestrian.sdf
+
+Train and test!
+
+== CLASSIFIER IMAGE FORMAT ==
+[classifier signature] [width] [height] [preprocessor params]
+[classifier data......]
+
+== KNOWN ISSUE ==
+
+This tool works - for now - only on greyscale images.
+
+== CLASSIFIER FILE FORMAT ==
+Classifiers generate file in the format (Fomat v2.3):
+
+<classifier name> <pattern width> <pattern height> <options> <CR>
+[ classifier data ]
+
+== LICENSE ==
+
+X-Boost: Ada-Boost (and more) on Haar Feature (and others) Optimized Library
+
+Copyright (c) 2008-2014 Paolo Medici <medici@ce.unipr.it>
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the
+Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.
+
+== DETAIL ON ALGORITHM ==
+Based on 
+- Schapire & Singer (Machine Learning, 1999) "Improved Boosting Algorithm Using Confidence-rated Predictions"
+- Bourdev, L., Brandt, J. (CVPR. 2005) "Robust object detection via soft cascade."
+- P. Dollár, Z. Tu, P. Perona and S. Belongie (BMVC 2009, London, England.) "Integral Channel Features"
+
+
+
+
+
+

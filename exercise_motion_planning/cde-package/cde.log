@@ -1,0 +1,8 @@
+cd 'cde-root/mnt/data/home/sculrich/Software/ros/catkin_ws/src/vcharge_summer_school_python'
+'./ipython.cde' '-c' 'run /mnt/data/home/sculrich/Software/ros/catkin_ws/src/vcharge_summer_school_python/bin/vcharge_summer_school_cde_deployment.py'
+'./ipython.cde' '-c' 'run /mnt/data/home/sculrich/Software/ros/catkin_ws/src/vcharge_summer_school_python/bin/vcharge_summer_school_cde_deployment.py'
+'./ipython.cde' '-c' 'run /mnt/data/home/sculrich/Software/ros/catkin_ws/src/vcharge_summer_school_python/bin/vcharge_summer_school.py'
+'./ipython.cde' '-c' 'run /mnt/data/home/sculrich/Software/ros/catkin_ws/src/vcharge_summer_school_python/bin/vcharge_summer_school.py'
+'./ipython.cde' '-c' 'run /mnt/data/home/sculrich/Software/ros/catkin_ws/src/vcharge_summer_school_python/bin/vcharge_summer_school.py'
+'./ipython.cde' '-c' 'run /mnt/data/home/sculrich/Software/ros/catkin_ws/src/vcharge_summer_school_python/bin/vcharge_summer_school.py'
+'./ipython.cde' '-c' 'run /mnt/data/home/sculrich/Software/ros/catkin_ws/src/vcharge_summer_school_python/bin/vcharge_summer_school.py'

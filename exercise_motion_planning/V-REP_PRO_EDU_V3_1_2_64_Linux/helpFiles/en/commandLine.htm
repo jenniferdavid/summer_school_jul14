@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Strict//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<title>Command line</title>
+<link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+
+<body>
+
+<div align="center">
+<table class=allEncompassingTable >
+ <tr>
+  <td >
+<p><a href="../index.html" TARGET="_top"><img src="images/homeImg.png"></a></p>
+
+
+
+<h1>Command line</h1>
+
+<p>When you start V-REP via the command line, you have following command line options that are supported: </p>
+
+<li><strong>-h</strong>: runs V-REP in headless mode (i.e. without any GUI)</li>
+<li><strong>-sXXX</strong>: automatically start the simulation. <strong>XXX</strong> represents an optional simulation time in milliseconds after which simulation should stop again.</li>
+<li><strong>-q</strong>: automatically quits V-REP after the first simulation run ended.</li>
+<li><strong>-gXXX</strong>: <strong>XXX</strong> represents an optional argument that can be queried within V-REP with the <em><a href="apiConstants.htm#stringParameters">sim_stringparam_app_arg</a></em> parameter.</li>
+<li><strong>-aXXX</strong>: loads and runs an additional <a href="addOns.htm">add-on script</a> specified via its filename (<strong>XXX</strong>). The add-on will be loaded and run only for the first scene.</li>
+<li><strong>-bXXX</strong>: loads and runs an additional <a href="addOns.htm">add-on script</a> specified via its filename (<strong>XXX</strong>). The add-on will be loaded and run for all the scenes that will be opened.</li>
+<li><strong>XXX.ttt</strong>: loads a <a href="scenes.htm">V-REP scene</a>.</li>
+<li><strong>XXX.ttm</strong>: loads a <a href="models.htm">V-REP model</a>.</li>
+<li><strong>XXX.ttb</strong>: loads a <a href="customUserInterfaces.htm">V-REP custom UI</a> file.</li>
+
+<p>For example, to start V-REP in headless mode, load the scene <em>myScene.ttt</em>, run the simulation for 5 seconds, then stop the simulation and automatically leave V-REP again, type from within the V-REP main folder:</p>
+
+<pre class=lightGreyBox>
+<strong>Windows:</strong> vrep.exe -h -s5000 -q myScene.ttt</pre>
+
+<pre class=lightGreyBox>
+<strong>Mac:</strong> ./vrep.app/Contents/MacOS/vrep -h -s5000 -q ../../../myScene.ttt</pre>
+
+<pre class=lightGreyBox>
+<strong>Linux:</strong> ./vrep.sh -h -s5000 -q myScene.ttt</pre>
+ 
+ 
+ <br> 
+ <br> 
+ 
+  </td>
+ </tr>
+</table> 
+</div>  
+  
+  
+</body>
+
+</html>

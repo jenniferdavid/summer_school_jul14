@@ -1,0 +1,23 @@
+127.0.0.1	localhost
+127.0.1.1	sculrich	
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+
+192.168.15.99 pk
+
+192.168.1.1 router-gateway
+
+#vcharge
+192.168.1.10 Vchargeekf1
+192.168.1.20 Vchargeekf2
+192.168.1.30 Vchargeekf3
+192.168.1.40 Vchargeekf4
+192.168.1.50 Vchargeekf5
+192.168.1.60 Vchargeekf6
+192.168.1.30 vcharge-ntp-server-lan
+
+192.168.1.20 ekf-git

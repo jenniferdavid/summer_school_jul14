@@ -1,0 +1,1 @@
+./../../../../..//usr/share/pyshared/matplotlib/fontconfig_pattern.py

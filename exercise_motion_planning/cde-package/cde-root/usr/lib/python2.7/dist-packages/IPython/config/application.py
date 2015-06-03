@@ -1,0 +1,1 @@
+../../../../../share/pyshared/IPython/config/application.py

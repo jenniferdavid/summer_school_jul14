@@ -1,0 +1,53 @@
+[ ] Invece che avere un campo parity, se non c'e' degrad delle prestazioni, cambiare la polarita' dei pesi nella feature
+[ ] Benchmark feature a template invece che i nodi a vettore / funzione virtuale. 
+[.] JIT e/o generazione codice
+[?] Implementare un Bayesian Stump con numero di bin variabili: 
+    forse non serve. Le migliori prestazioni si ottengono ovviamente con 32 bin. Capire se questo specializza troppo il sistema o meno.
+[ ] VIOLA JONES CASCADE (sia in training che in post-process)
+[ ] Salvare nel file del classificatore dei commenti
+[ ] Completare classificatore HOG+SVM
+[ ] durante il bootstrap integrare il pool di feature con quelle estratte nel ciclo precedente.
+[.] Tutta la classe di addestramenti con feature precalcolate. Vedere quale mancano.
+[ ] Aggiungere rumore ai pattern?
+[ ] SoftCascade con Real-AdaBoost e Gentle-AdaBoost.
+[ ] missing configuration code for HAAR-like
+[ ] Investigare politiche migliori per il reoptimize
+[ ] syntax -n <base>+<iter> es -n 500+250
+[~] sistemare bug in NonMaximaSuppression sull'area di ricerca ridotta: i bordi non vengono valutati
+[ ] softcascade con alberi di decisione
+[ ] Aggiungere feature moderne (ACF)
+[ ] We emphasize that we shrink the channels rather than the original image (please refer to the related discussion on pre and post-smoothing). 
+[ ] Valutare le performance della NMS con tutti i sopra soglia
+[.] Costruire incrementalmente la response dei sample in addestramento nei sistemi adaboost like per evitare a ogni iterazione di rivalutare TUTTO il classificatore nuovamente, ma solo aggiornarlo.
+[ ] Positive/negative Weight
+
+NOTE: In our original experiments we enforced that random rectangles have area of at least 25 pixels to avoid the feature pool from being dominated by small rectangles. 
+
+
+    bootstrapping::bootstrap(boost::filesystem::path(classifierName), negativeImagesPaths,
+                             maxFalsePositives, maxFalsePositivesPerImage,
+                             min_scale, max_scale, num_scales,
+                             min_ratio, max_ratio, num_ratios,
+                             use_less_memory,
+                             falsePositivesData, falsePositives);
+                             
+History:
+
+[X] riga e colonna 0 dell'immagine integrale non sono mai considerate
+[X] MultiThread
+
+[X] Integral Channel Image.
+[X] Estrazione automatica negativi e positivi della dimensione corretta.
+[X] Esportare il training set in fase di creazione in una cartella.
+[X] nel bootstrap salvare con nomi differenti la versione finale del classificatore in modo che non venga sovrascritta ad ogni ciclo
+    di bootstrap
+
+[X] 14.01.2014 probabilmente MAdaBoost non funziona piu [BUG]
+[X] 26.02.2014 versione che trova la best feature in 1 passo.
+[X] 04.03.2014 Ottimizzazione Decision Stump con euristica ad istogramma          
+[X] 04.03.2014 quantizzare step per la brute force ICF e HAAR
+[X] 22.05.2014 memory leakage in integralchannelpreprocessor
+[X] 28.06.2014 fix resample bug
+[X] terminare bootstrap quando il classificatore non raggiunge il 100% dei negativi sul training set (o almeno dare warning)
+[X] Sviluppare Alberi di Decisione a piu' livelli con AdaBoost con metrica molto euristica (richiede probabilmente il precalcolo di tutte le feature)
+[X] 30.06.2014 softcascade trainer (in modo da estrarre in fase di bootstrap i negativi piu velocemente)

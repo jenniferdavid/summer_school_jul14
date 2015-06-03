@@ -1,0 +1,1 @@
+../../../../../../share/pyshared/IPython/core/magics/osm.py

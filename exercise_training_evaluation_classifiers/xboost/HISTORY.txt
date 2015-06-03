@@ -1,0 +1,51 @@
+1.9.2 / 06Apr2012:
+ Mingw Porting
+ CMake Migration
+
+2.0.0 / 18Apr2012:
+ Factory based. Rename all classes.
+
+2.0.1 / 12Jun2012
+  Serious BUGFIX in IntegralImage generation. All data was corrupted!
+
+2.0.3 / 20Aug2012
+  Moving to stable release
+
+2.3.1 / Jan2014
+  Feature HAAR, ICHN, partially HOG
+  Negative extraction and new file descriptor
+  
+2.3.2 / Mar2014  
+  Multiscale testing
+  Completed Negative extraction (with multiscale)
+  Bootstrapping (with multiscale extraction)
+  AutoTerminate (tpr, fpr, margin, extra iteration)
+  New Set Description Format
+  New Optimization Heuristic
+  BruteForce/Random Sampling for ICF/Haar with Step
+  
+2.3.3 / Apr2014
+  Code CleanUp
+
+2.3.4 / Maj2014
+  enabled IChn for decision-tree, random-tree and so on
+  Enabled BootStrap for all the trainer
+  Softcascade postprocessor uses now factory to process classifiers
+  AdaBoost DecisionTree with fixed feature
+  
+2.3.5 / 28Maj2014
+  AdaBoost DecisionTree with fast heuristic, reoptimization
+  Fixed several errors
+  
+2.3.6 / 23Jun2014
+  Minor Changes. BugFix.
+  Search ranges in ROI
+  
+2.3.7 /
+  Precomputed Pattern Response for Adaoost+DecisionStump
+  SoftCascade Trainer
+  ptrainer tool
+  Fix: Alloc more of 4Gb features*samples
+  Initial support for X11-window output
+  -f option now ichn
+  

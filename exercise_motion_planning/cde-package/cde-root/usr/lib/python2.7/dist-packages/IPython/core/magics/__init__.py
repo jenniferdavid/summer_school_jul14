@@ -1,0 +1,1 @@
+../../../../../../share/pyshared/IPython/core/magics/__init__.py

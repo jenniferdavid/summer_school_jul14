@@ -1,0 +1,589 @@
+//////////////////////////////////////////// versione 2.3.2 //////
+
+Il formato Set Description File (SDF) deve servire sia come primo addestramento che come 
+base per cercare i negativi.
+
+Esistono 3 casi:
+- immagini di soli positivi (da ridimensionare)
+- immagini di soli negativi. Potrebbero essere semplicemente ridimensionati, ma anche sfruttati interamente e nelle loro versioni multiscala. Di fatto le immagini dei puri negativi da ridimensionare semplicemente dovrebbero
+  andare a scomparire, perche' reduci del sistema precedente. Per il bootstrap si devono estrarre a caso un certo numero di finestre e poi riaddestrare quelle sbagliate, mente in fase di valutazione delle ROC tutte le finestra
+  hanno in effetti senso.
+- immagini di positivi e negativi. Il positivo e' da ridimensionare e croppare in fase di addestramento, mentre in fase di valutazione richiede un approccio multiscala e un group rectangle. I negativi sono tutto cio' che non
+  tocca un positivo. Per i negativi si possono estrarre a caso quelli che non toccano i positivi/donotcare, e in valutazione lo stesso.
+
+Un immagine pertanto puo' essere
+- POSITIVO DA RIDIMENSIONARE
+- NEGATIVO DA RIDIMENSIONARE (categoria da deprecare)
+- POSITIVO/NEGATIVO/DONOTCARE da processare eventualmente multiscala con una lista di ROI dei positivi/donotcare. Senza lista si tratta di un immagine di soli negativi da processare. Giustamente non servono ROI per i negativi.
+
+- opzionalmente positivi da croppare e ridimensionare ma non usare come negativi
+
+1) POSITIVO da ridimensionare
+#CLASS +1
+positive list
+
+non ammette ROI
+
+cat:A object:+1,0,0,0,0
+
+2) NEGATIVO da ridimensionare
+#CLASS -1
+negative list
+
+non ammette ROI
+
+cat:A object:-1,0,0,0,0
+
+3) POSITIVO/NEGATIVO da ridimensionare e croppare ma non da processare in maniera random
+#AUTO
+list +1 x0 y0 x1 y1 ... -1 x0 y0 x1 y1 ... 
+
+senza ROI da errore
+
+cat:A object:list
+
+4) POSITIVO/DONOTCARE da processare + NEGATIVO nello spazio rimanente. Senza roi e' tutto un negativo da processare.
+#DEFAULT
+positive list +1 x0 y0 x1 y1 .... 0 x0 y0 x1 y1
+negative list
+
+cat:B object:positive/donotcare
+
+pertanto con la ROI sono positivi e donotcare, restante spazio negativi, senza ROI sono puri negativi da processare.
+
+
+///////// 2.3.x /////
+
+Tipi di file supportati
+ - liste di campioni gia' di dimensione prestabilita, croppati. Positivi e Negativi. Come quelli attuali insomma.
+   Esempio:
+   
+   #LIST +1
+   file1
+   file2
+   file3
+   #LIST -1
+   file1
+   file2
+   file3
+   
+ - liste di campioni di dimensione generica, da ridimensionare. Positivi e Negativi.
+   VARIANTE: La geometria potrebbe essere specificata come parametro a riga di comando del tool
+   Esempio:
+   
+   #GEOMETRY 48 48
+   #LIST +1
+   file1
+   file2
+   file3
+   #LIST -1
+   file1
+   file2
+   file3
+   
+ - liste di campioni di dimensione generica, da croppare e ridimensionare (percio' file + ROI). Positivi e Negativi.
+    Esempio:
+   
+   file1 +1 X0 Y0 X1 Y1 ... -1 X0 Y0 X1 Y1
+   file2 ...
+   file3 ...
+   
+ - lista di campioni di dimensione generica da estrarre random dei pattern che NON collidono con le ROI. Negativi.
+   VARIANTE: Il numero di campioni da estrarre casualmente (tanto sono sempre i negativi) possono essere indicati da riga di comando
+   #GEOMETRY 48 48
+   #EXTRACTRANDOM -1 10
+   file1 +1 X0 Y0 X1 Y1 0 X0 Y0 X1 Y1
+   file2 ...
+   file3 ...
+
+   
+La geometria, se specifica in linea di comando, viene usata quella. Altrimenti si usa il primo campione come geometria.
+Se indicato in linea di comando di estrarre i negativi da file, questi vengono estratti random. Altrimenti nella descrizione della sequenza e' indicato l'elenco dei positivi e dei negativi.
+Percio' rimarrebbe solo
+   #LIST +1
+   file1
+   file2
+   file3
+   #LIST -1
+   file1
+   file2
+   file3
+o
+   file1 +1 X0 Y0 X1 Y1 0 X0 Y0 X1 Y1
+   file2 ...
+   file3 ...
+con 0 indicate le zone Do Not Care
+
+Rimane il problema di indicare in maniera semplice i NEGATIVI puri, non da ridimensionare. E' anche vero che i negativi puri, NON DOVREBBERO esistere (?).
+Evitare di riprendere dentro parti gia' individuate nei cicli precedenti. Salvataggio delle ROI a parte?
+   
+//////////////////////////////////////////// versione 2.2 //////
+
+template<HaarNode _Tp, std::allocator< void > _Alloc = std::allocator< _Tp > >
+struct HaarFeature;
+Problema MultiBoost e generalizzazione del problema dei decision stump:
+  il codice base dei decision stump e' uguale, cambia solo la "Policy" (in quanto policy). Unificare.
+  
+Valutare se rinunciare al DecisionStump con la parity a favore di una versione senza Parity.
+
+== Elenco delle feature ==
+
+Gestione dell'input delle immagini da disco
+ * Caricare Immagini
+ * Caricare e Riscalare immagini (sia per addestramento, che per testare il classificatore)
+ * Caricare, Croppare e Riscalare immagini 
+ * Caricare immagini e aggiungere rumore
+ * Estrarre sottoaree automaticamente di un immagine (bootstrap per i negativi)
+  
+Preprocessor (possono essere anche esterni al progetto e preprocessare in anticipo tutti i dati salvandoli in un file di preprocessing)
+ * Integral Image (BW)
+ * Integral Channel Image (BW, RGB, YUV, LUV, HOG, ...)
+ * HOG (BW)
+
+  
+Estrazione di feature:
+ * Haar (Immagine Integrale)
+ * Haar su Canali (Integral Channel Image)
+ * SumArea (Immagine Integrale)
+ * IntegralChannelFeature (Integral Channel Image)
+ * Estrattore di un indice del vettore (HOG)
+
+Precalcolare un numero fisso di feature. In questo caso conviene per esempio calcolare le feature man mano che vengono caricate le immagini da disco.
+ Questo ha senso per HOG, ma anche per ICF quando si vuole usare un pool fisso di feature. 
+
+Generatore di feature 
+ * Estrazione di feature random 
+ * Brute Force (o utilizzo di un subset fisso di Feature generate in precedenza)
+
+BootStrapping
+ * Scegliere (Negativi) random
+ * Aggiungere a un set gia' processato (?) un numero di negativi classificati male (i peggiori) 
+  
+Classificatori (deboli):
+ * Binari: -1 |  +1
+ * Binary Reali: - inf | +inf
+ * MultiClasse: {+/-1}^{K}
+ * MultiClasse Reali: R^{K} 
+  
+ * che operano su scalari (feature) {Feature Level Classifier }
+    - DecisionStump, NaiveDecisionStump, SimpleDecisionStump, BayesStump, ...
+    
+ * che operano su vettori {Vector Level Classifier}
+    - SVM lineare(?)
+    
+ * "Di Secondo Livello" che processano dati (complessi o meno) e li passano a uno degli altri classificatori    {[Preprocessed] Data Level Classifier}
+    - Classificatore che unisce un FeatureExtractor a un classificatore che opera su scalari per ritornare interi
+    Non ho capito (:D)
+  
+  Rimane il fatto che il preprocessing converte parte dei dati in dati processati
+
+Oracle
+ * Data una metrica e un insieme di campioni pesati, estrae la feature migliore
+   Metriche usate:
+   - AdaBoost
+   - GentleAdaBoost
+   - RealAdaBoost
+   A seconda della metrica l'oracolo puo' cambiare per rendere piu' ottimizzata la ricerca
+
+Possibili oracoli:
+  Boosted <DecisionStump | NaiveDecisionStump | SimpleDecisionStump>  <-> AdaBoost.M1
+  RealDecisionStump <-> RealAdaBoost | GentleAdaBoost
+  BayesianStump <-> AdaBoost.M1 | RealAdaBoost | GentleAdaBoost  
+  
+AdaBoost
+ * Aggiornamento dei pesi
+   - Decision Stump+WeightedClassifier 
+   - RealDecisionStump
+
+Problematiche Aperte:
+ * l'immagine integrale richiede un puntatore ai dati RAW,. ma l'accesso e' fornito da un offset costante
+ * ICF: Definire i canali in maniera parametrica (RGB, YUV, LUV, HOG6, HOG7, HOG8, HOG9, UHOG..., etc etc)
+ * Permettere il resamping dello spazio delle feature per la gestione multiscala in maniera trasparente
+
+== Caricamento dei DataSet ==
+
+Esistono nel caso binario 2 dataset: positivi e negativi. Nel caso multiclasse esisono N classi con N dataset.
+
+- Il dataset puo' essere un file di testo con elencate le immagini:
+immagine0.pgm
+immagine1.pgm
+...
+
+le immagini potrebbero essere di dimensione non uguale tra loro.
+
+-  Versione con suggerito un crop:
+immagine0.pgm X0 Y0 X1 Y1
+
+- Formato dati JSON o XML.
+
+- estrarre dall'immagine dati in un secondo momento, attraverso un algoritmo dedicato pero' al problema (e non generale?)
+
+Ok caricare FILE e ROI e' una cosa a parte e si puo' gestire in altra maniera
+
+**
+Il percorso normalmente e'
+1) Loading delle immagini, cropping e resize, aventualmente aggiunta del rumore.
+2) preprocessing: HOG, ICF, Immagine Integrale.
+99% dei problemi si risolve in questa maniera, unica cosa separare ad alto livello la parte di IO dalla parte di Preprocessing in modo da poterla sfruttare meglio in fase di classificazione.
+
+La cosa piu' semplice comunque e' fare due trainer differenti: uno che carica tutte le immagini preprocessate in memoria e poi estrae le feature random, e l'altra che carica a ogni iterazione le immagini, le preprocessa ed estrare le feature.
+
+
+**
+siccome tutti i pattern DEVONO avere gli stessi parametri deve sempre essere possibile lavorare sia a livello
+<PARAM|DATA1> ... <PARAM|DATAn>
+che
+<PARAM|DATA1 ... DATAn>
+
+I feature extractor richiedono i parametri per estrarre le feature, sia in fase di classificazione, che in fase di addestramento.
+
+DataType sono per esempio un uin32_t *
+ParamType sono per esempio (width,height) o (width,height,n_channels)
+
+Forma piu' generale del feature extractor:
+ FeatureExtractor::operator()( data_ptr, window offset (x,y), image parameters)
+
+L'offset puo' essere gestito a parte quasi sempre (e in teoria il problema permane per l'offset iniziale dovuto all'immagine integrale).
+
+Per motivi di performance e' meglio non passare alle feature le strutture <DATA> e <PARAM> ma i singoli valori "DIGERITI":
+
+ 
+Versione base HaarFeature+IntegralImage
+int FeatureExtractor::operator()( uint32_t *data_ptr, long stride )
+ 
+Versione ottimizzata HaarFeature+IntegralImage
+int FeatureExtractor::operator()( uint32_t *data_ptr)
+
+
+Versione base ICF
+int FeatureExtractor::operator()( uint32_t *data_ptr, long stride1, long stride2 )
+
+Versione ottimizzata ICF
+int FeatureExtractor::operator()( uint32_t *data_ptr)
+
+
+L'invocazione dipende sia dal livello di ottimizzazione che dal tipo di immagine preprocessata.
+- gestire il problema delle immagini integrali estese, dove il punto (-1,-1) e' ammissibile.
+
+Il Classificatore accetta 1,2,3 parametri che rimanda poi al feature extractor cosi' come sono.
+
+Serve un TRAITS per convertire i DATA+PARAMS in parametro1, parametro2 o parametro3.
+
+
+**** NOTA: tutto nasce dal preprocessor che fornisce sia il tipo di storage del dato che il tipo di parametro associato.
+Dal preprocessor poi viene istanziato il Pattern di conseguenza.
+
+Pattern Base: DATA, CATEGORY, [Weight]
+Pattern Usato in AdaBoost: DATA, CATEGORY, Weight, Test
+
+Tupla?
+
+Il tipo di Pattern Generato da un Preprocessor si puo' stabilire dal typedef.
+E' solo un problema di nomi, ovvero far comparire il nome del preprocessor dentro al DataSetHandle, ovvero far discendere tutto dal Preprocessor, brutto.
+Le classi dei problemi sono, al momento:
+ - HaarFeature
+ - IntegralChannelFeature
+
+HaarFeatureProblem?
+
+
+DATASET [ (PATTERN|DATA)1 ... N | PARAMS ]
+
+DATASET [ (CATEGORY|DATA|EXTRA)1..N | PARAMS ]
+
+L'idea comunque e' quella di separare nettamente le classi usate per l'addestramento da quelle usate per la classificazione e non far dipendere le seconde dalle prime.
+
+
+
+
+
+ 
+--------- classificazione ---------
+
+HaarFeature -> Immagini Integrale, e gestire il problema multiscala.
+
+Implementare un classificatore per bootstrapping dei negativi.
+
+  
+  
+//////////////////////////////////////////// versione 2.0 //////
+
+Estrazione di feature:
+ * Haar (Immagine Integrale)
+ * SumArea (Immagine Integrale)
+ 
+Classificatore Binario
+ * Dichotomic Decision Stump {+1,-1} [DicreteClassifier]
+   * Weighted Classifier (Moltiplica un Decision Stump per un peso fisso) [converte un DicreteClassifier in un RealClassifier]
+ * Real/Asymmetric Decision Stump {p,n}
+ 
+Oracle
+ * Data una metrica e un insieme di campioni pesati, estrae la feature migliore
+   Metriche usate:
+   - AdaBoost
+   - GentleAdaBoost
+   - RealAdaBoost
+   A seconda della metrica l'oracolo puo' cambiare per rendere piu' ottimizzata la ricerca
+   
+AdaBoost
+ * Aggiornamento dei pesi
+   - Decision Stump+WeightedClassifier 
+   - RealDecisionStump
+
+
+Oracle: 
+  Boosted <DecisionStump | NaiveDecisionStump | SimpleDecisionStump>  <-> AdaBoost.M1
+  RealDecisionStump <-> RealAdaBoost | GentleAdaBoost
+  BayesianStump <-> AdaBoost.M1 | RealAdaBoost | GentleAdaBoost
+  
+  
+L'Oracolo possiede un TRAINING SET usato per calcolare le soglie.
+
+   
+//////////////   
+   
+boost-haar -> additive-boost-decisionstump-haar    
+haarrealdecisionstump -> additive-realdecisionstump-haar
+   -> softcascade-boost-decisionstump-haar
+///// v1.0 ////
+
+[Descrizione Albero delle cartelle]
+
+Descrittore: (manca)
+ Haar: intero (scalare), float (scalare)
+ LBP:  intero (scalare)
+ HoG:  array di float
+
+ Questa cartella manca. Si puo' fornire il valore della Feature::DescriptorType.
+ 
+Preprocessor:
+ Funzioni per convertire una immagine in un oggetto memorizzabile in un DataSet
+ Il Preprocessor fornisce in parte la struttura "data" contenuta dentro al Pattern
+ Tipi di preprocessor:
+ - Integral Image
+ - Integral Channel Images
+ - HOG
+ 
+Feature:
+ TODO: sono FeatureExtractor (ma la Feature e' lo scalare?)
+ Oggetti che dato un immagine precalcolata ad hoc, ritornano uno scalare.
+ Tipo: DescriptorType
+ Metodi: response(...)
+ Extra:  si dividono in ottimizzati e no
+ Note: ogni feature"extractor" richiede una differente immagine precalcolata.
+       Harris: ritorna uno scalare
+       HoG   : (?) ritorna tutto il descrittore di HoG in questa fase (capire come trasformarmlo). Coincide con il DataSet.
+
+FeatureGenerator:
+ Oggetti che generano una "Feature" secondo alcuni algoritmi. Potenzialmente potrebbe anche ottimizzare la feature, secondo qualche funzione costo.
+ Il feature generator genera un "Feature"Extractor
+ Tipo: FeatureType
+ Metodi: Next, Reset (Count per debug)
+  
+Classifier:
+ Classificatori. Ogni classificatore ha bisogno di un campione in N-dimensioni.
+ DecisionStump richiede 1 dimensione.
+ SVM richiede N dimensioni con N=Dimensione dello spazio delle feature.
+ 
+ Un classificatore e' la fusione di un Classificatore Core + Feature
+ es. DecisionStump + FeatureX
+ 
+ Ensemble: Alberi di Decisione, AdaBoost, SVM
+ Sono classificatori che dipendono da 1) piu' classificatori 2) da piu' feature. boh
+
+Oracle:
+ Oggetti che esegono una ottimizzazione di un Classificatore 
+ Oggetti che eseguno una scelta tra tatti Classificatori+Feature generati da un FeatureGenerator.
+ 
+DataSet:
+ Il dataset contiene i dati dell'immagine di precalcolo (es immagine integrale per Haar) o i descrittori gia' calcolati(HoG).
+ Oltre questo, ad ogni Pattern, sono associati dei dati per quanto riguarda gli Ensemble Learner: di fatto potrebbero stare in memoria a parte, ma per semplicita' e per ridurre il numero di parametri si 
+ possono mettere insieme, questo pero' provoca una dipedenza tra il DataSet e l'ensemble Learner scelto.
+ 
+Trainer:
+ Gli Ensemble o i Base Learner.
+ AdaBoost, GentleAdaBoost, RealAdaBoost, MAdaBoost.
+ Cambiano le metriche? In tal caso cambia l'oracolo.
+ Cambiano gli Update. Cambia i dati extra al DataSet.
+
+
+ 
+ 
+ 
+////////////////////////////////////////////////
+MPI:
+>>> Il server carica i dati da disco, calcola il preprocessing e li invia a tutti i client.
+
+Ogni Core Genera feature a caso (o si prende una fetta del feature set), trova il migliore, lo manda indietro.
+
+
+
+//////////////////////////////////////////////////
+
+TODO: pensare anche al MultiBoost!
+
+Differenza tra HoG e HAAR:
+  Da un pattern possono essere estratti (secondo parametri dell'algoritmo) un certo numero di feature.
+  HoG estrae un numero limitato: si possono precalcolare.
+  Haar estra un numero grande di scalari: non si possono precalcolare.
+
+Gli oracoli possono (per sfruttare il multithread) valutare N classificatori contemporaneamente.
+Gli Oracoli per il DecisionStump, che richiede uno scalare, hanno bisogno di 
+
+Dimensione massima descrittore? 
+1) <TH -> Il DataSet contiene l'array dei descrittori
+2) >TH -> Il DataSet contiene dei precalcoli
+
+Esistono due classi pertanto di "Feature": quelle che si precalcolano e richiedono un *** o quelle che non si precalcolano e richiedono un FeatureGenerator e una funzione di Precompute.
+ Passare i parametri al feature generator.... come? usare una sintassi tipo -- <feature generator params>
+ Allo stesso modo passare i parametri al precomputer e al feature generator "monolitico"
+
+Immagine (8 o 16 bit, anche colori?) -> 
+ * DataSet come hash e poi si usa un FeatureGenerator
+ * Descrittore direttamente (immagine -> Descrittore)
+
+
+ADABOOST+DECISIONSTUMP+HAAR: IMMAGINE -> IMMAGINE_INTEGRALE -> HAAR FEATURE -> DECISION STUMP -> ADABOOST
+HOG+SVM: IMMAGINE -> HOG DESCRIPTOR -> SVM
+DECISIONTREE+HAAR: IMMAGINE ->IMMAGINE_INTEGRALE -> HAAR FEATURE -> DECISIONTREE
+
+Gli Oracoli sono associati a un feature_optimizer ? dipende dalla metrica, ma questa potrebbe fornira l'ottimizzatore in se....
+  DecisionStump_Weighted_Optimizer: gli arriva in ingresso un array di pesi associati al pattern da ottimizzare e la categoria (-1, +1) vector<pair>. Imposta la parita' e la soglia. non multithread.
+  DecisionStump_Optimizer: non c'e' la soglia associata a ogni pattern. 
+  BayesianStump_Weighted_Optimizer: Genera i bin della distribuzione.
+
+Metodi dell'Oracolo:
+ Alcuni che permettono di impostare il Training Set, altri che permettono di impostare il generatore di ipotesi. 
+ Siccome il classificatore e il training set sono strettamente legati, e' facile che si possa evitare di usare una classe virtuale (...)
+ Tuttavia tra classificatore e Feature Extractor potrebbe esserci separazion. Tuttavia se il classificatore e' a template, sono di fatto inscindibili.
+ 
+I FeatureExtractor accettano un certo numero di parametri, necessari per ottenere la risposta scalare, funzione del tipo di "hash" che richiedono in ingresso:
+  (const unsigned int *integral_image, long pitch)
+  (const unsigned int *integral_image)
+  
+Parte della complessita' pero' viene anche spostata sul classificatore (lo so, e' assurdo, ma e' per puri motivi di performance):
+ Un Decision Stump che sia invariante alla luminosita' per esempio, richiede come ingresso i parametri da passare al feature extractor, e i parametri per normalizzare la risposta
+  
+In questo caso il DataSet e' pilotato anche dal classificatore per quanto riguarda il calcolo degli Hash.
+Indi per cui il classificatore puo' cambiare il tipo di precalcolo che necessita il classificatore (o accettare solo particolari precalcoli, pena mancata compilazione).
+
+Il classificatore, prendendo in ingresso il Pattern dentro il DataSet deve ritornare una ipotesi (+1, -1).
+
+** Il classificatore deve prendere in ingresso tanti parametri... che poi li passa al feature extractor piu' interno se necessario
+   
+TODO: Mettere virtuale la parte Ensemple.
+
+DecisionStump/SimpleDecisionStump/NaiveDecisionStump ritornano +1,-1 e va associato a un BoostableClassifier 
+ che trasforma +1,-1 in -alpha,+alpha (simmetrico)
+RealDecisionStump ritorna già un voto (anche assimmetrico).
+[Fare i benchmark delle performance di applicazione]
+
+Classificatori:
+ BINARI : ritornano -1, +1. Questi possono essere BOOSTED e si ottiene un classificatore BOOSTED.
+ BOOSTED: ritornano gia' un peso (calcolato con metriche differenti). Questi votano per maggioranza
+
+  
+//////////////////////////////////////////////////
+
+Il classificatore richiede un generare di "feature" che trasforma il dato immagine in uno scalare.
+Siccome non e' conveniente mischiare diversi tipi di feature, al momento si e' limitato dalle feature di Haar su immagine integrale.
+
+TODO: sistemare lo scostamento dell'immagine integrale 
+
+Il generatore di feature e' una classe virtuale che genera dei feature extractor phi(x).
+
+La funzione phi(x) al momento lavora su immagine integrale e genera un numero intero come output.
+
+A questo punto sulla feature si puo' usare
+
+DiscreteAdaBoost:
+ - DecisionStump
+ - BayesianStump
+DiscreteAdaBoostWithAbstention (di fatto e' una generalizzazione del DiscreteAdaBoost):
+ - DecisionStumpWithAbstention
+ - BayesianStumpWithAbstention
+RealAdaBoost:
+ 
+ 
+Associato a queste 3 categorie ci sono 3 oracoli che trovano la phi(x) migliore (che massimizza Z). Come metrica e' ottima per AdaBoost.
+
+
+oltre a una classe di operatori multidimensionali (di indubbia utilita' finora).
+
+- L'oracolo permette di estrarre il miglior classificatore che massimizza W+ (AdaBoost).
+
+
+Tra AdaBoost e MAdaBoost cambia solo la regola di update (e nasconde internamente il vero peso dei campioni). 
+Questa differenza in effetti non pregiudica il resto del codice ed e' ortogonale alle altre tecniche.
+GentleBoost cambia solo il modo in cui viene minimizzata la funzione:
+ AdaBoost cerca il classificatore che massimizza \sum w_i (i: y_i == f(x_i) ) e associa un peso alpha al fitting.
+ GentleBoost cerca il classificatore che minimizza \sum w_i (y_i - f(x_i)^2).
+
+* RealAdaBoost richiede un oracolo che ritorni un numero tra 0 e 1.
+  Non richiede alpha (da valutare), suggerendo di fatto che alpha dovrebbe essere un termine di tipo statistico?
+  
+
+* Gentle Boost: richiede di minimizzare una quantita' diversa E_w[ (y_i - h(x) )^2  ]
+  Non richiede alpha, in quanto compreso nel classificatore.
+
+ADABOOST: associa alpha al classificatore binario. Aggiorna i pesi  
+  
+MADABOOST: modifica il preprocessing, assegnando pesi diversi ai pattern.
+
+GENTLEBOOST: fornisce un classificatore già pesato. Modificare i pesi.
+  
+--- RandomForest? Richiede un oracolo?
+ Deve massimizzare una delle 3 metriche, pertanto lavora direttamente sopra il feature generator.
+
+-- Generic 
+ Discrete AdaBoost ?
+ Discrete MAdaBoost ?
+ Real AdaBoost
+ Gentle AdaBoost
+
+ 
+ Dividere i classificatori che sono poi quelli usati in GOLD dal trainer.
+ 
+BoostableClassifier: public DecisionStump
+ - un metodo che ritorni +alpha, -alpha in fase di test 
+ - un metodo che ritorni +1|-1 del WeakLearner (*)
+
+DecisionStump: public HaarFeature
+ - un metodo che ritorni +1|-1 (*)
+ - un metodo che ritorni il valore del Feature Extrator (**)
+ - un metodo che ritorni entrambi (vabbe)
+
+HaarFeature:
+ - un metodo che ritorni il valore della feature  (**)
+
+
+	Unire ROC e Classify in una unica applicazione
+
+
+
+BoostableClassifier + DecisionStump potrebbero essere ottimizzati 
+(diciamo che moltiplicare alpha * parity non e' esattamente uguale a tenerle divise.. capire se 
+ si riesce a ottenere un risultato compatibile)
+
+Generatore di Classificatori Deboli -> In Memoria, per permettere di fare un minimo di selezione a priori dei classificatori deboli.
+
+Bisogna generare i Response e tenerli in memoria.
+Poi convertire i Reponse in un DecisionStump<T> al momento dell'utilizzo (non è molto generale, peccato).
+
+
+Classificatore Debole basato su Estrattori di Feature + DecisionStump.
+I DecisionStump in AdaBoost hanno un metodo veloce per ottenere soglia e parita' ottime.
+
+I DecisionStump<T> devono avere un metodo chiamato pertanto response che generi le risposte di tutti i campioni, e un metodo
+AdaBoost+find_threshold (nome da cambiare) per settare i parametri del DecisionStump, dato un array di risposte e i pesi di AdaBoost.
+
+Chiaramente se la metrica è differente, la soglia sarà sicuramente differente (es Gini Index).
+
+Una cosa simile si puo' pensare per i DecisionTree.
+
+
+Fare un process retrain per riaddestrare cambiando solo i pesi di adaboost (eventualmente scartando i calssificatori negativi o sotto una determinata soglia).
+
+Fare un retrain cambiando la soglia del DecisionTree
+volendo anche con astensione (% del full range?) tipo 2/255 (1%) per gestire un risultato troppo ambiguo
+

@@ -1,0 +1,37 @@
+[$Version]
+update_info=mouse_cursor_theme.upd:kde3.4.99,kwin.upd:kde3.2Xinerama,kaccel.upd:kde3.3/r1,kded.upd:kde3.0
+
+[DirSelect Dialog]
+DirSelectDialog Size=814,580
+History Items[$e]=file://$HOME/Dokumente/Mendeley,file://$HOME/Dokumente,file://$HOME/Downloads,file://$HOME/Dropbox/Mendeley,file:///lib64,file://$HOME/Downloads,file://$HOME/Projekte/VTOL/Final Reports,file://$HOME/Software/v-charge/src/vcharge_wp4/vrep_interface_dds,file://$HOME,file://$HOME/Dropbox/Eigene Paper/IV13/scenes/InScenePics,file://$HOME/Software/v-charge/src/vcharge_wp4/local_planning_test/results,file://$HOME/Projekte/V-Charge/Media/Post-IW2-Tests,file://$HOME/Videos
+
+[KFileDialog Settings]
+Automatically select filename extension=true
+Breadcrumb Navigation=true
+Decoration position=0
+LocationCombo Completionmode=5
+PathCombo Completionmode=5
+Previews=true
+Recent URLs[$e]=$HOME/Software/ros/catkin_ws/src/vcharge_summer_school_python/scene/,$HOME/Downloads/,$HOME/Dokumente/,$HOME/Software/ros/catkin_ws/src/vcharge_summer_school_python/bin/,$HOME/Dropbox/v-charge/summer_school/images/,/opt/mendeleydesktop/bin/,$HOME/Dokumente/
+Show Bookmarks=false
+Show Full Path=false
+Show Preview=false
+Show Speedbar=true
+Show hidden files=false
+Sort by=Date
+Sort directories first=true
+Sort reversed=true
+Speedbar Width=255
+View Style=Detail
+
+[KShortcutsDialog Settings]
+Dialog Size=629,480
+
+[Locale]
+Country=ch
+
+[Windows]
+XineramaEnabled=
+XineramaMaximizeEnabled=
+XineramaMovementEnabled=
+XineramaPlacementEnabled=

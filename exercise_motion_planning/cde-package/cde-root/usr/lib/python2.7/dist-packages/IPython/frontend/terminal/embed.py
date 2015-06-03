@@ -1,0 +1,1 @@
+../../../../../../share/pyshared/IPython/frontend/terminal/embed.py

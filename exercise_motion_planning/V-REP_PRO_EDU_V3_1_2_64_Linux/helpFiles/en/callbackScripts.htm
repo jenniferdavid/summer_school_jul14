@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Strict//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<title>Callback scripts</title>
+<link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+
+<body>
+
+<div align="center">
+<table class=allEncompassingTable >
+ <tr>
+  <td >
+<p><a href="../index.html" TARGET="_top"><img src="images/homeImg.png"></a></p>
+
+
+
+<h1>Callback scripts</h1>
+
+<p>V-REP supports an unlimited number of callback scripts per <a href="scenes.htm">scene</a>. A callback script is usually needed to customize low-level control loops. Two types of callback scripts are currently supported:</p>
+
+<li><strong>an unlimited number of <a href="#jointCtrlCallback">joint control callback scripts</a></strong>: each <a href="joints.htm">joint</a> that is dynamically enabled can be controlled via a callback script.</li>
+<li><strong>one <a href="#contactCallback">contact callback script</a></strong>: the way the physics engine handles contacts can be customized via a C/C++ callback mechanism, or via a callback script.</li>
+
+
+<p>Following caracterises a callback script<a href="childScripts.htm"></a>:<br>
+</p>
+
+<li>a callback script is always non-threaded.</li>
+
+<li>a callback script might be called more than once for each simulation step. </li>
+<li>a callback script handles low-level control items that the user wishes to customize. They  should execute as quickly as possible, to avoid slowing down a simulation.<br>
+</li>
+
+<br>
+<br>
+
+
+<table class=subsectionTable><tr class=subsectionTd><td class=subsectionTd>
+<a name="jointCtrlCallback"></a>The joint control callback script
+</td></tr></table> 
+
+<p>The joint control callback script can be enabled via the <a href="jointDynamicsProperties.htm">joint dynamics properties</a> dialog. When enabled for a given joint, then the physics engine will call the callback script with appropriate arguments, allowing the user to customize the control loop of the related joint. The joint control callback script might be called quite often, normally 10 times per simulation step for a given joint (remember that the physics engine time step, by default, is 10 times smaller that the simulation time step). For that reason, keep things simple, in order to avoid slowing down the simulation. Following represents a simple PID joint control callback script:<br>
+</p>
+
+<pre class=lightWhiteBox>
+-- Following data is handed over from V-REP:
+init,revolute,cyclic,jointHandle,passCnt,totalPasses,currentPos,targetPos,errorValue,
+effort,dynStepSize,lowLimit,hightLimit,targetVel,maxForceTorque,velUpperLimit=...
+
+-- init: true when this callback is called for the first time (if the joint is
+--     dynamically reset during the simulation, this might be true more often)
+-- revolute: true if the joint is revolute
+-- cyclic: true if the joint is revolute and cyclic (i.e. no lower/upper limits)
+-- passCnt: the current dynamics calculation pass. 0-9 by default. See next
+--     item for details.
+-- totalPasses: the number of dynamics calculation passes for each "regular"
+--     simulation pass. 10 by default (i.e. 10*5ms=50ms which is the default
+--     simulation time step)
+-- currentPos: the current position of the joint
+-- targetPos: the desired position of the joint
+-- errorValue: targetPos-currentPos (with revolute cyclic joints we take the
+--     shortest cyclic distance)
+-- effort: the last force or torque that acted on this joint along/around its axis.
+--     With Bullet, torques from joint limits are not taken into account
+-- dynStepSize: the step size used for the dynamics calculations (by default 5ms)
+-- lowLimit: the joint lower limit
+-- highLimit: the joint upper limit
+-- targetVel: the joint target velocity (as set in the user interface)
+-- maxForceTorque: the joint maximum force/torque (as set in the user interface)
+-- velUpperLimit: the joint velocity upper limit (as set in the user interface)
+
+-- The control happens here:
+-- 1. PID parameter def:
+if not PID_P then
+	PID_P=0.1
+	PID_I=0
+	PID_D=0
+end
+-- 2. Clear some values when the dynamic joint calls this the first time
+(this can happen several times, if the joint is reset dynamically):
+if init then
+	pidCumulativeErrorForIntegralParam=0
+end
+-- 3. Proportional part:
+ctrl=errorValue*PID_P
+-- 4. Integral part:
+if PID_I~=0 then
+	pidCumulativeErrorForIntegralParam=pidCumulativeErrorForIntegralParam+errorValue*dynStepSize
+else
+	pidCumulativeErrorForIntegralParam=0
+end
+ctrl=ctrl+pidCumulativeErrorForIntegralParam*PID_I
+-- 5. Derivative part:
+if not init then
+	ctrl=ctrl+(errorValue-pidLastErrorForDerivativeParam)*PID_D/dynStepSize
+end
+pidLastErrorForDerivativeParam=errorValue
+-- 6. Calculate the velocity needed to reach the position in one dynamic time step:
+velocityToApply=ctrl/dynStepSize
+if (velocityToApply > velUpperLimit) then
+	velocityToApply=velUpperLimit
+end
+if (velocityToApply < -velUpperLimit) then
+	velocityToApply=-velUpperLimit
+end
+forceOrTorqueToApply=maxForceTorque
+
+-- Following data must be returned to V-REP:
+return forceOrTorqueToApply,velocityToApply
+
+-- forceOrTorqueToApply: the maximum force/torque that the joint will be able to exert
+-- velocityToApply: the velocity to apply to the joint.</pre>
+
+<br>
+<br>
+
+<table class=subsectionTable><tr class=subsectionTd><td class=subsectionTd>
+<a name="contactCallback"></a>The contact callback script
+</td></tr></table> 
+
+<p>The contact callback script can be enabled via the <a href="environmentPropertiesDialog.htm">environment dialog</a>. When enabled, and the physics engine detected a collision between two respondable shapes, then the callback script will be called with appropriate arguments, allowing the user to customize the handling of contacts. The contact callback script might be called very often, sometimes more than several hundreds of times per simulation step (remember also that <strong>by default</strong>, the physics engine will be called 10 times for one simulation step). For that reason, keep things simple, in order to avoid slowing down the simulation.</p>
+
+<p>Remember that custom contact handling is linked to a given <a href="scenes.htm">scene</a>, and <a href="objects.htm">objects</a>/<a href="models.htm">models</a> will be behaving differently in a different scene. Contact callback scripts are only recomended for users that know exactly what they are doing. Following represents a default contact callback script:<br>
+</p>
+
+<pre class=lightWhiteBox>
+-- Following data is handed over from V-REP:
+objectHandle1,objectHandle2,engine=...
+
+if not retTable1 then
+	if engine==sim_physics_bullet then
+    	-- refer to simRegisterContactCallback for parameter description:
+		retTable1={0,0,0}
+		retTable2={1,0,0,0,0,0,0,0,0,0,0,0,0,0}
+	end
+	if engine==sim_physics_ode then
+    	-- refer to simRegisterContactCallback for parameter description:
+		retTable1={0,4,4+8+16+2048}
+		retTable2={0.25,0,0,0,0.25,0,0,0,0,0,0,0,0,0}
+	end
+	if engine==sim_physics_vortex then
+    	-- refer to simRegisterContactCallback for parameter description:
+		retTable1={0,0,0}
+		retTable2={0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+	end
+end
+
+-- Following data must be returned to V-REP:
+-- -1 if you don't want to handle that contact here (i.e. the default handling will be used,
+--    or the C/C++ callback will decide)
+--  0 if the 2 items should not react to collision (this overrides the default contact handling)
+--  1,tableValues1,tableValues2 if you handle this contact (this overrides the default contact handling)
+
+return 1,retTable1,retTable2</pre>
+
+<p>Refer also to the <a href="apiOverview.htm">regular API</a> function <a href="apiFunctions.htm#simRegisterContactCallback">simRegisterContactCallback</a>.</p>
+
+
+<br>
+<h3 class=recommendedTopics>Recommended topics</h3>
+<li><a href="scripts.htm">Embedded scripts</a></li>
+
+<br>
+<br>
+ </tr>
+</table> 
+</div>  
+  
+  
+</body>
+
+</html>

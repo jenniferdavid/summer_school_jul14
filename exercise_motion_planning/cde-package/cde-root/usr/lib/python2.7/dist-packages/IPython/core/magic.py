@@ -1,0 +1,1 @@
+../../../../../share/pyshared/IPython/core/magic.py

@@ -1,0 +1,3 @@
+#!/bin/sh
+HERE="$(dirname "$(readlink -f "${0}")")"
+cd "$HERE/cde-root" && ../cde-exec '-o' '/home/sculrich/Projekte/V-Charge/summer_school/exercise_motion_planning/exercise_motion_planning/cde-package' 'ipython' "$@"

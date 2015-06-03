@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Strict//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<title>Settings</title>
+<link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+
+<body>
+
+<div align="center">
+<table class=allEncompassingTable >
+ <tr>
+  <td >
+<p><a href="../index.html" TARGET="_top"><img src="images/homeImg.png"></a></p>
+
+
+
+<h1>User settings</h1>
+
+<p>Some values and settings in V-REP are not dependent on a <a href="scenes.htm">scene</a> or <a href="models.htm">model</a>, but rather dependent on the user. The user settings dialog (which partially reflects the content of file <em>system/usrset.txt</em>) can be accessed with [Menu bar --&gt; Tools --&gt; Settings] or by clicking following toolbar button:<br>
+</p>
+
+<p align=center><img src="images/settings1.jpg"></p>
+<p class=imageLabel>[Settings toolbar button]</p>
+<br>
+
+<p align=center><img src="images/settings2.jpg"></p>
+<p class=imageLabel>[User settings dialog]</p>
+<br>
+
+<li> <strong>User interface units</strong>: specifies how data is shown to the user and how the user enters data. By default, all units are displayed and entered as degrees, meters and seconds. Changing the settings here will be reflected in all dialogs. The settings however don't affect the way data is exchanged through the <a href="apisOverview.htm">API functions</a> (which is always in radians, meters and seconds).</li>
+<li> <strong>Translation step size</strong>: the linear step size used when translating <a href="objects.htm">objects</a> in the <a href="objectMovement.htm">object manipulation mode</a>. It is recommended to keep a value of 5 cm. Objects can be assigned specific step sizes in the <a href="coordinateDialog.htm">coordinate and transformation dialog</a>.</li>
+<li> <strong>Rotation step size</strong>: the angular step size used when rotating  <a href="objects.htm">objects</a> in the <a href="objectMovement.htm">object manipulation mode</a>. Objects can be assigned specific step sizes in the <a href="coordinateDialog.htm">coordinate and transformation dialog</a>.</li>
+<li> <strong>Remove identical vertices, tolerance</strong>: when selected, vertices that lay nearby other vertices will be grouped to form one single vertex (that will then be shared among surrounding triangles). This reduces the amount of memory resources needed. This parameter is affecting meshes when they are being <a href="importExport.htm">imported</a> or <a href="shapes.htm">shapes</a> when leaving the <a href="shapeEditModes.htm">shape edit mode</a>. Tolerance specifies the distance threshold to consider when grouping vertices. In general, keep a low value, but different from zero: some mesh data formats (e.g. STL) assign individual vertices to each triangle, regardless whether a vertex is identical with another vertex in another triangle; this can considerably increase the amount of memory required.<br>
+</li>
+<li> <strong>Remove identical triangles</strong>: when selected, identical triangles in a mesh resource will be removed during an import operation or when a shape leaves the shape edit mode.</li>
+<li> <strong>Ignore triangle winding</strong>: a triangle can have two distinct orientations (since it has two distinct faces). When this item is selected, the triangle orientation is ignored when identifying identical triangles.</li>
+<li> <strong>Antialiasing</strong>: displays smooth edges, and smooth 2D graph curves/points. This might slow down display and/or create visual artifacts.</li>
+<li> <strong>Display world reference</strong>: displays a small world reference frame in the lower left hand side of a <a href="cameras.htm">camera</a> view. As everywhere in V-REP, the red, green and blue arrows correspond to the x-, y-, and z-axis respectively.</li>
+<li> <strong>Display bounding boxes of selected objects</strong>: displays a white/yellow bounding box around selected objects</li>
+<li> <strong>Undo/redo enabled</strong>: enables or disables the undo/redo functionality. That functionality operates by serializing (saving) the entire scene to memory every time a change was registered. Only differences with previous undo points are memorized so as to use little memory. This is a very efficient and fail-safe undo/redo that is also supported from <a href="plugins.htm">plugins</a> or the <a href="mainClientApplication.htm">main client application</a>, and that is permitted only because V-REP's serialization routines are very fast. There are however times when either the computer is really old or the scene content extremely large (e.g. very detailed cad data) where this method slows down the whole application. In that case, simply disable the undo/redo functionality.</li>
+<li> <strong>Hide console window</strong>: allows hiding or showing the <a href="userInterface.htm#ConsoleWindow">console window</a>. By default, the console window is hidden. On Mac, this item is not available (the standard output can be viewed in the system console (Applications/Utilities/Console)).</li>
+<li> <strong>Transparent dialogs</strong>: allows turning dialogs semi-transparent when they loose focus.</li>
+<li> <strong>Auto-save enabled</strong>: when auto-save is enabled, each opened scene will be saved on a regular basis. In case of a crash, the auto-saved scenes can be restored. The auto-save delay can be adjusted in the file system/usrset.txt.</li>
+
+<li><strong>Enable work threads</strong>: when enabled, then some simulation calculations will be executed in parallel. Enabling this checkbox effectively sets  <em>sim_intparam_work_thread_count</em> to <em>sim_intparam_core_count</em>. Refer also to the <a href="apiConstants.htm#integerParameters">integer parameters</a> and the <a href="apiFunctionListCategory.htm#workThreads">related API functions</a>.</li>
+<li><strong>Threaded rendering</strong>: when enabled, then <a href="simulation.htm#threadedRendering">rendering will run in a separate thread during simulation</a>, effectively accelerating the simulation cycle. Instead of using this check-box, it is recommended to toggle to/from threaded rendering via its dedicated <a href="userInterface.htm#toolbars">toolbar button</a>.</li>
+<li> <strong>External script editor</strong>: you can specify an other editor for editing <a href="scripts.htm">embedded scripts</a>. Changes will only take effect after you restart V-REP (do not forget to save the settings first!).</li>
+<li> <strong>Adjust OpenGL settings</strong>: opens a dialog that allows to adjust most settings related to OpenGL:</li>
+
+<br>
+<br>
+
+<table class=subsectionTable><tr class=subsectionTd>
+  <td class=subsectionTd>
+<a name="openGl"></a>OpenGL settings
+</td></tr></table> 
+
+
+<p align=center><img src="images/openGlSettings.jpg"></p>
+<p class=imageLabel>[OpenGL settings dialog]</p>
+<br>
+
+
+<li><strong>Offscreen context type</strong>: the type of the offscreen rendering contexts. Default are invisible windows.</li>
+<li><strong>FBO type</strong>: the type of the frame buffer objects. Default are Qt-based FBOs on Mac, and Non-Qt-based FBOs on Windows and Linux.</li>
+<li><strong>Exclusive GUI rendering</strong>: when checked, then renderings will exclusively happen from the GUI thread. This option is highly recommended, otherwise you might experience instabilities.</li>
+<li><strong>Compatibility tweak</strong>: check this item if your main view suddenly stops actualizing at the end of a simulation. Not recommended.</li>
+<li><strong>Use glFinish when rendering a page</strong>: allows in certain special situations to accomodate for various problems. Not recommended.</li>
+<li><strong>Use glFinish when rendering with vision sensors</strong>: allows in certain special situations to accomodate for various problems. Not recommended.</li>
+<li><strong>Idle fps</strong>: the number of frames per second when idle.</li>
+<li><strong>Force use of EXT-functions</strong>: forces usage of older OpenGL functions. Might have an effect only when using non-Qt-based FBOs.</li>
+<li><strong>Desired OpenGL version</strong>: allows in certain situations to overcome compatibility problems. Recommended values are (-1,-1), but you may try different combinations such as: (1,1), (2,0), (3,0), (4,0). Might have an effect only when using offscreen surfaces, or Qt-based FBOs.</li>
+
+
+<br>
+
+
+<br>
+<h3 class=recommendedTopics>Recommended topics</h3>
+<li><a href="objectMovement.htm">Object manipulation mode</a></li>
+<li><a href="coordinateDialog.htm">Coordinate and transformation dialog</a></li>
+<li><a href="importExport.htm">Mesh import / export</a></li>
+<li><a href="shapeEditModes.htm">Shape edit modes</a></li>
+<li><a href="userInterface.htm#ConsoleWindow">Console window</a></li>
+
+<br>
+<br>
+
+
+ </tr>
+</table> 
+</div>  
+  
+  
+</body>
+
+</html>

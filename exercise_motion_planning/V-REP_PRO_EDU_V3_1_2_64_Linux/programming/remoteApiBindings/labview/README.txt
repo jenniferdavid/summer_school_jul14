@@ -1,0 +1,1 @@
+The interface and documentation is courtesy of Peter Mačička

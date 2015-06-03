@@ -1,0 +1,1 @@
+cde-package/cde-root/mnt/data/home/sculrich/Software/ros/catkin_ws/src/vcharge_summer_school_python/bin/vcharge_summer_school.py
